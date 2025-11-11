@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""ECDSA (ES256) verifier and signer that use the ``cryptography`` library.
+"""ECDSA verifier and signer that use the ``cryptography`` library.
 """
 
-<<<<<<< Updated upstream
 from cryptography import utils  # type: ignore
 import cryptography.exceptions
 from cryptography.hazmat import backends
@@ -65,14 +64,14 @@ class EsVerifier(base.Verifier):
         if len(sig_bytes) != self._r_s_size * 2:
             return False
         r = (
-            int.from_bytes(sig_bytes[:self._r_s_size], byteorder="big")
+            int.from_bytes(sig_bytes[: self._r_s_size], byteorder="big")
             if _helpers.is_python_3()
-            else utils.int_from_bytes(sig_bytes[:self._r_s_size], byteorder="big")
+            else utils.int_from_bytes(sig_bytes[: self._r_s_size], byteorder="big")
         )
         s = (
-            int.from_bytes(sig_bytes[self._r_s_size:], byteorder="big")
+            int.from_bytes(sig_bytes[self._r_s_size :], byteorder="big")
             if _helpers.is_python_3()
-            else utils.int_from_bytes(sig_bytes[self._r_s_size:], byteorder="big")
+            else utils.int_from_bytes(sig_bytes[self._r_s_size :], byteorder="big")
         )
         asn1_sig = encode_dss_signature(r, s)
 
@@ -110,17 +109,8 @@ class EsVerifier(base.Verifier):
             pubkey = serialization.load_pem_public_key(public_key_data, _BACKEND)
 
         return cls(pubkey)
-=======
-from google.auth.crypt.es import EsSigner
-from google.auth.crypt.es import EsVerifier
->>>>>>> Stashed changes
 
 
-class ES256Verifier(EsVerifier):
-    pass
-
-
-<<<<<<< Updated upstream
 class EsSigner(base.Signer, base.FromServiceAccountMixin):
     """Signs messages with an ECDSA private key.
 
@@ -143,9 +133,16 @@ class EsSigner(base.Signer, base.FromServiceAccountMixin):
         if isinstance(private_key.curve, ec.SECP384R1):
             self._r_s_size = 48
             self._sha_algo = hashes.SHA384()
+            self._alg = "ES384"
         else:
             self._r_s_size = 32
             self._sha_algo = hashes.SHA256()
+            self._alg = "ES256"
+
+    @property  # type: ignore
+    def alg(self):
+        """Optional[str]: The algorithm used to sign the messages."""
+        return self._alg
 
     @property  # type: ignore
     @_helpers.copy_docstring(base.Signer)
@@ -160,9 +157,15 @@ class EsSigner(base.Signer, base.FromServiceAccountMixin):
         # Convert ASN1 encoded signature to (r||s) raw signature.
         (r, s) = decode_dss_signature(asn1_signature)
         return (
-            (r.to_bytes(self._r_s_size, byteorder="big") + s.to_bytes(self._r_s_size, byteorder="big"))
+            (
+                    r.to_bytes(self._r_s_size, byteorder="big")
+                    + s.to_bytes(self._r_s_size, byteorder="big")
+            )
             if _helpers.is_python_3()
-            else (utils.int_to_bytes(r, self._r_s_size) + utils.int_to_bytes(s, self._r_s_size))
+            else (
+                    utils.int_to_bytes(r, self._r_s_size)
+                    + utils.int_to_bytes(s, self._r_s_size)
+            )
         )
 
     @classmethod
@@ -203,9 +206,3 @@ class EsSigner(base.Signer, base.FromServiceAccountMixin):
         """Pickle helper that deserializes the _key attribute."""
         state["_key"] = serialization.load_pem_private_key(state["_key"], None)
         self.__dict__.update(state)
-
-
-=======
->>>>>>> Stashed changes
-class ES256Signer(EsSigner):
-    pass
